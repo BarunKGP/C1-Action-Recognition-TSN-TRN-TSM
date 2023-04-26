@@ -75,9 +75,7 @@ class EpicDatasetAdapter(AbstractDatasetAdapter):
             #     folder = (Path(self.video_segment_dir) / )
             paths = [
                 folder / f"frame_{idx:010d}.jpg"
-                for idx in range(
-                    meta["start_frame"], meta["stop_frame"] + 1
-                )  #! change this to take the weakly-supervised stop frame
+                for idx in range(meta["start_frame"], meta["end_frame"])
             ]
             frames = list(resize_images(map(str, paths), self.frame_size))
             meta["frame_size"] = frames[0].shape
@@ -118,9 +116,7 @@ class EpicFlowDatasetAdapter(EpicDatasetAdapter):
 
             folder = Path(self.video_segment_dir) / meta["participant_id"] / video_id
             start_frame = meta["start_frame"]
-            stop_frame = meta[
-                "stop_frame"  #! change this to take the weakly-supervised stop frame
-            ]
+            stop_frame = meta["end_frame"]
             paths = {
                 axis: [
                     folder / axis / f"frame_{idx:010d}.jpg"
