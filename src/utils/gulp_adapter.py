@@ -1,8 +1,5 @@
 from pathlib import Path
-from typing import Any
-from typing import Dict
-from typing import Iterator
-from typing import List
+from typing import Any, Dict, Iterator, List
 
 import pandas as pd
 from gulpio2.adapters import AbstractDatasetAdapter
@@ -50,7 +47,7 @@ class EpicDatasetAdapter(AbstractDatasetAdapter):
         self.meta_data = self._df_to_list_of_dicts(annotations_df)
         self.extensions = {"jpg", "jpeg", extension}
 
-    def iter_data(self, slice_element=None) -> Iterator[Result]:
+    def iter_data(self, slice_element=None, rgb=True) -> Iterator[Result]:
         """Get frames and metadata corresponding to segment
 
         Args:
@@ -67,12 +64,20 @@ class EpicDatasetAdapter(AbstractDatasetAdapter):
         """
         slice_element = slice_element or slice(0, len(self))
         for meta in self.meta_data[slice_element]:
-            folder = (
-                Path(self.video_segment_dir) / meta["participant_id"] / meta["video_id"]
-            )
+            if rgb:
+                folder = (
+                    Path(self.video_segment_dir)
+                    / "rgb_frames"
+                    / meta["participant_id"]
+                    / meta["video_id"]
+                )
+            # else:
+            #     folder = (Path(self.video_segment_dir) / )
             paths = [
                 folder / f"frame_{idx:010d}.jpg"
-                for idx in range(meta["start_frame"], meta["stop_frame"] + 1)
+                for idx in range(
+                    meta["start_frame"], meta["stop_frame"] + 1
+                )  #! change this to take the weakly-supervised stop frame
             ]
             frames = list(resize_images(map(str, paths), self.frame_size))
             meta["frame_size"] = frames[0].shape
@@ -113,7 +118,9 @@ class EpicFlowDatasetAdapter(EpicDatasetAdapter):
 
             folder = Path(self.video_segment_dir) / meta["participant_id"] / video_id
             start_frame = meta["start_frame"]
-            stop_frame = meta["stop_frame"]
+            stop_frame = meta[
+                "stop_frame"  #! change this to take the weakly-supervised stop frame
+            ]
             paths = {
                 axis: [
                     folder / axis / f"frame_{idx:010d}.jpg"
@@ -127,7 +134,6 @@ class EpicFlowDatasetAdapter(EpicDatasetAdapter):
                 frames[axis] = list(
                     resize_images(map(str, paths[axis]), self.frame_size)
                 )
-
             meta["frame_size"] = frames["u"][0].shape
             meta["num_frames"] = len(frames["u"])
             result = {

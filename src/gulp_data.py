@@ -1,13 +1,13 @@
 """Program for building GulpIO directory of frames for training
 See :ref:`cli_tools_gulp_ingestor` for usage details """
 import argparse
+import os
 from multiprocessing import cpu_count
 from pathlib import Path
 
 import pandas as pd
 from gulpio2 import GulpIngestor
-from utils.gulp_adapter import EpicDatasetAdapter
-from utils.gulp_adapter import EpicFlowDatasetAdapter
+from utils.gulp_adapter import EpicDatasetAdapter, EpicFlowDatasetAdapter
 
 
 parser = argparse.ArgumentParser(
@@ -59,11 +59,17 @@ def main(args):
         raise ValueError("Expected .csv or .pkl suffix for annotation file")
     if args.modality.lower() == "flow":
         epic_adapter = EpicFlowDatasetAdapter(
-            str(args.in_folder), labels, args.frame_size, args.extension,
+            str(args.in_folder),
+            labels,
+            args.frame_size,
+            args.extension,
         )
     elif args.modality.lower() == "rgb":
         epic_adapter = EpicDatasetAdapter(
-            str(args.in_folder), labels, args.frame_size, args.extension,
+            str(args.in_folder),
+            labels,
+            args.frame_size,
+            args.extension,
         )
     else:
         raise ValueError("Modality '{}' not supported".format(args.modality))
@@ -71,6 +77,9 @@ def main(args):
         epic_adapter, str(args.out_folder), args.segments_per_chunk, args.num_workers
     )
     ingestor()
+
+    # for root, dirs, files in os.walk(args.in_folder, topdown=True):
+    #     for name in
 
 
 if __name__ == "__main__":
