@@ -47,7 +47,7 @@ class EpicDatasetAdapter(AbstractDatasetAdapter):
         self.meta_data = self._df_to_list_of_dicts(annotations_df)
         self.extensions = {"jpg", "jpeg", extension}
 
-    def iter_data(self, slice_element=None, rgb=True) -> Iterator[Result]:
+    def iter_data(self, slice_element=None) -> Iterator[Result]:
         """Get frames and metadata corresponding to segment
 
         Args:
@@ -64,15 +64,13 @@ class EpicDatasetAdapter(AbstractDatasetAdapter):
         """
         slice_element = slice_element or slice(0, len(self))
         for meta in self.meta_data[slice_element]:
-            if rgb:
-                folder = (
-                    Path(self.video_segment_dir)
-                    / "rgb_frames"
-                    / meta["participant_id"]
-                    / meta["video_id"]
-                )
-            # else:
-            #     folder = (Path(self.video_segment_dir) / )
+            folder = (
+                # Path(self.video_segment_dir)
+                Path(meta["root_dir"])
+                / "rgb_frames"
+                # / meta["participant_id"]
+                / meta["video_id"]
+            )
             paths = [
                 folder / f"frame_{idx:010d}.jpg"
                 for idx in range(meta["start_frame"], meta["end_frame"])
