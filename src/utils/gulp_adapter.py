@@ -64,23 +64,27 @@ class EpicDatasetAdapter(AbstractDatasetAdapter):
         """
         slice_element = slice_element or slice(0, len(self))
         for meta in self.meta_data[slice_element]:
-            folder = (
-                # Path(self.video_segment_dir)
-                Path(meta["root_dir"])
-                / "rgb_frames"
-                # / meta["participant_id"]
-                / meta["video_id"]
-            )
-            paths = [
-                folder / f"frame_{idx:010d}.jpg"
-                for idx in range(meta["start_frame"], meta["end_frame"])
-            ]
-            frames = list(resize_images(map(str, paths), self.frame_size))
-            meta["frame_size"] = frames[0].shape
-            meta["num_frames"] = len(frames)
+            try:
+                folder = (
+                    # Path(self.video_segment_dir)
+                    Path(meta["root_dir"])
+                    / "rgb_frames"
+                    # / meta["participant_id"]
+                    / meta["video_id"]
+                )
+                paths = [
+                    folder / f"frame_{idx:010d}.jpg"
+                    for idx in range(meta["start_frame"], meta["end_frame"])
+                ]
+                frames = list(resize_images(map(str, paths), self.frame_size))
+                meta["frame_size"] = frames[0].shape
+                meta["num_frames"] = len(frames)
 
-            result = {"meta": meta, "frames": frames, "id": (self.get_uid(meta))}
-            yield result
+                result = {"meta": meta, "frames": frames, "id": (self.get_uid(meta))}
+                print(f'Extracted frames for {meta["video_id"]}')
+                yield result
+            except Exception as e:
+                print(e)
 
     def get_uid(self, meta):
         if "narration_id" in meta:
