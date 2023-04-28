@@ -1,37 +1,33 @@
 import logging
+import re
 from pathlib import Path
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
-from datasets import EpicVideoDataset
-from datasets import EpicVideoFlowDataset
-from datasets import TsnDataset
+from datasets import EpicVideoDataset, EpicVideoFlowDataset, TsnDataset
+
+from models.tsm import TSM
+from models.tsn import MTRN, TSN
 from omegaconf import DictConfig
 from torch import Tensor
 from torch.optim import SGD
 from torch.optim.lr_scheduler import MultiStepLR
-from torch.utils.data import ConcatDataset
-from torch.utils.data import DataLoader
+from torch.utils.data import ConcatDataset, DataLoader
 from torchvision.transforms import Compose
-from transforms import ExtractTimeFromChannel, GroupNDarrayToPILImage
-from transforms import GroupCenterCrop
-from transforms import GroupMultiScaleCrop
-from transforms import GroupNormalize
-from transforms import GroupRandomHorizontalFlip
-from transforms import GroupScale
-from transforms import Stack
-from transforms import ToTorchFormatTensor
+from transforms import (
+    ExtractTimeFromChannel,
+    GroupCenterCrop,
+    GroupMultiScaleCrop,
+    GroupNDarrayToPILImage,
+    GroupNormalize,
+    GroupRandomHorizontalFlip,
+    GroupScale,
+    Stack,
+    ToTorchFormatTensor,
+)
 from utils.torch_metrics import accuracy
-
-from models.tsm import TSM
-from models.tsn import MTRN
-from models.tsn import TSN
 
 TASK_CLASS_COUNTS = [("verb", 97), ("noun", 300)]
 LOG = logging.getLogger(__name__)
@@ -46,6 +42,10 @@ def split_task_outputs(
         outputs[task] = output[..., offset : offset + n_units]
         offset += n_units
     return outputs
+
+
+def strip_model_prefix(state_dict):
+    return {re.sub("^module.", "", k): v for k, v in state_dict.items()}
 
 
 class EpicActionRecogintionDataModule(pl.LightningDataModule):
@@ -218,7 +218,7 @@ class EpicActionRecognitionSystem(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         step_results = self._step(batch)
         self.log_metrics(step_results, "val")
-        return step_results['loss']
+        return step_results["loss"]
 
     def test_step(self, batch, batch_idx):
         data, labels_dict = batch
@@ -231,9 +231,7 @@ class EpicActionRecognitionSystem(pl.LightningModule):
             "video_id": labels_dict["video_id"],
         }
 
-    def log_metrics(
-        self, step_results: Dict[str, float], step_type: str
-    ) -> None:
+    def log_metrics(self, step_results: Dict[str, float], step_type: str) -> None:
         self.log(f"loss/{step_type}", step_results["loss"])
         for task in ["verb", "noun"]:
             self.log(f"{task}_loss/{step_type}", step_results[f"{task}_loss"])
@@ -324,12 +322,12 @@ def load_model(cfg: DictConfig) -> TSN:
                 f"you also specified to load weights from {cfg.model.weights}."
                 "The latter will take precedence."
             )
-
         LOG.info(f"Loading weights from {cfg.model.weights}")
         state_dict = torch.load(cfg.model.weights, map_location=torch.device("cpu"))
         if "state_dict" in state_dict:
             # Person is trying to load a checkpoint with a state_dict key, so we pull
             # that out.
-            state_dict = state_dict["state_dict"]
-        model.load_state_dict(state_dict)
+            LOG.info("Stripping 'model' prefix from pretrained state_dict keys")
+            sd = strip_model_prefix(state_dict["state_dict"])
+        model.load_state_dict(sd)
     return model

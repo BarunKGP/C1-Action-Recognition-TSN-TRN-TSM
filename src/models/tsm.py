@@ -18,7 +18,7 @@ LOG = logging.getLogger(__name__)
 
 
 def strip_module_prefix(state_dict):
-    return {re.sub("^model.", "", k): v for k, v in state_dict.items()}
+    return {re.sub("^module.", "", k): v for k, v in state_dict.items()}
 
 
 class TSM(nn.Module):
@@ -69,21 +69,39 @@ class TSM(nn.Module):
         LOG.info(
             f"""
 
+
+
     Initializing {self.__class__.__name__} with base model: {base_model}.
+
+
+
+
 
 
 
     {self.__class__.__name__} Configuration:
 
+
+
         input_modality:     {self.modality}
+
+
 
         num_segments:       {self.num_segments}
 
+
+
         segment_length:     {self.segment_length}
+
+
 
         consensus_module:   {self.consensus_type}
 
+
+
         dropout_ratio:      {self.dropout}
+
+
 
             """
         )
