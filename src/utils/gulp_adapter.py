@@ -85,6 +85,7 @@ class EpicDatasetAdapter(AbstractDatasetAdapter):
                 yield result
             except Exception as e:
                 print(e)
+                print("meta:", meta)
                 print("num_frames:", len(frames), " frames:\n", frames)
 
     def get_uid(self, meta):
