@@ -81,7 +81,7 @@ class EpicDatasetAdapter(AbstractDatasetAdapter):
                 meta["num_frames"] = len(frames)
 
                 result = {"meta": meta, "frames": frames, "id": (self.get_uid(meta))}
-                print(f'Extracted frames for {meta["video_id"]}')
+                # print(f'Extracted frames for {meta["video_id"]}')
                 yield result
             except Exception as e:
                 print(e)
