@@ -11,15 +11,14 @@ import torchvision
 from ops.basic_ops import ConsensusModule
 from ops.temporal_shift import make_temporal_shift
 from torch import nn
-from torch.nn.init import constant_
-from torch.nn.init import normal_
+from torch.nn.init import constant_, normal_
 from torch.utils import model_zoo
 
 LOG = logging.getLogger(__name__)
 
 
 def strip_module_prefix(state_dict):
-    return {re.sub("^module.", "", k): v for k, v in state_dict.items()}
+    return {re.sub("^model.", "", k): v for k, v in state_dict.items()}
 
 
 class TSM(nn.Module):
@@ -63,21 +62,29 @@ class TSM(nn.Module):
 
         if not before_softmax and consensus_type != "avg":
             raise ValueError("Only avg consensus can be used after Softmax")
-
         if segment_length is None:
             self.segment_length = 1 if modality == "RGB" else 5
         else:
             self.segment_length = segment_length
         LOG.info(
             f"""
+
     Initializing {self.__class__.__name__} with base model: {base_model}.
 
+
+
     {self.__class__.__name__} Configuration:
+
         input_modality:     {self.modality}
+
         num_segments:       {self.num_segments}
+
         segment_length:     {self.segment_length}
+
         consensus_module:   {self.consensus_type}
+
         dropout_ratio:      {self.dropout}
+
             """
         )
 
@@ -88,7 +95,6 @@ class TSM(nn.Module):
         if self.modality == "Flow":
             LOG.info("Converting model to take operate on optical flow")
             self.base_model = self._construct_flow_model(self.base_model)
-
         self.consensus = ConsensusModule(consensus_type)
 
         if self.pretrained == "kinetics":
@@ -125,10 +131,8 @@ class TSM(nn.Module):
                 LOG.info("Loading kinetics pretrained flow weights")
             else:
                 raise ValueError(f"Unknown modality {self.modality}")
-
         if not self.before_softmax:
             self.softmax = nn.Softmax()
-
         self._enable_pbn = partial_bn
         if partial_bn:
             self.partialBN(True)
@@ -151,7 +155,6 @@ class TSM(nn.Module):
                 nn.Dropout(p=self.dropout),
             )
             self.new_fc = nn.Linear(feature_dim, num_class)
-
         std = 0.001
         if self.new_fc is None:
             normal_(
@@ -171,7 +174,6 @@ class TSM(nn.Module):
             LOG.info(f"Loading backbone model with {backbone_pretrained} weights")
         elif self.pretrained is None and backbone_pretrained is None:
             LOG.info("Randomly initialising backbone")
-
         if "resnet" in base_model:
             self.base_model = getattr(torchvision.models, base_model)(
                 pretrained=backbone_pretrained
@@ -186,13 +188,11 @@ class TSM(nn.Module):
                     place=self.shift_place,
                     temporal_pool=self.temporal_pool,
                 )
-
             if self.non_local:
                 LOG.info("Adding non-local module...")
                 from ..ops.non_local import make_non_local
 
                 make_non_local(self.base_model, self.num_segments)
-
             self.base_model.last_layer_name = "fc"
             self.input_size = 224
             self.input_mean = [0.485, 0.456, 0.406]
@@ -266,7 +266,6 @@ class TSM(nn.Module):
                         lr10_bias.append(ps[1])
                     else:
                         normal_bias.append(ps[1])
-
             elif isinstance(m, torch.nn.BatchNorm2d):
                 bn_cnt += 1
                 # later BN's are frozen
@@ -284,7 +283,6 @@ class TSM(nn.Module):
                             type(m)
                         )
                     )
-
         return [
             {
                 "params": first_conv_weight,
@@ -324,13 +322,10 @@ class TSM(nn.Module):
             base_out = self.base_model(input.view((-1, sample_len) + input.size()[-2:]))
         else:
             base_out = self.base_model(input)
-
         if self.dropout > 0:
             base_out = self.new_fc(base_out)
-
         if not self.before_softmax:
             base_out = self.softmax(base_out)
-
         if self.reshape:
             if self.is_shift and self.temporal_pool:
                 base_out = base_out.view(
