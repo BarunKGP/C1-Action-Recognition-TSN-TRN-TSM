@@ -45,7 +45,7 @@ def split_task_outputs(
 
 
 def strip_model_prefix(state_dict):
-    return {re.sub("^module.", "", k): v for k, v in state_dict.items()}
+    return {re.sub("^model.", "", k): v for k, v in state_dict.items()}
 
 
 class EpicActionRecogintionDataModule(pl.LightningDataModule):
