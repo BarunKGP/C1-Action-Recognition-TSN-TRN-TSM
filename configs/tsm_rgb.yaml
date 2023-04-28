@@ -57,7 +57,7 @@ trainer:
   benchmark: yes
   accelerator: dp
   # Assuming V100s for batch size
-  gpus: 4
+  gpus: 3
 
 
 defaults:
