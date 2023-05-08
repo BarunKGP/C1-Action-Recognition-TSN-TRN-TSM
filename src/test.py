@@ -1,20 +1,18 @@
-from collections import defaultdict
-
 import argparse
 import logging
 import os
 import pickle
+from collections import defaultdict
 from pathlib import Path
-
-import colorlog
-import torch
-import numpy as np
-from omegaconf import OmegaConf
-from pytorch_lightning import Callback, Trainer
 from typing import Any, Dict, List, Sequence, Union
 
-from systems import EpicActionRecogintionDataModule
-from systems import EpicActionRecognitionSystem
+import colorlog
+import numpy as np
+import torch
+from omegaconf import OmegaConf
+from pytorch_lightning import Callback, Trainer
+
+from systems import EpicActionRecogintionDataModule, EpicActionRecognitionSystem
 
 parser = argparse.ArgumentParser(
     description="Test model", formatter_class=argparse.ArgumentDefaultsHelpFormatter
@@ -58,7 +56,6 @@ class ResultsSaver(Callback):
     ):
         if dataset_name not in self.results:
             self.results[dataset_name] = {k: [] for k in batch_outputs.keys()}
-
         for k, vs in batch_outputs.items():
             if isinstance(vs, torch.Tensor):
                 vs = vs.detach().cpu().numpy()
@@ -68,10 +65,7 @@ class ResultsSaver(Callback):
         filepath = Path(filepath)
         filepath.parent.mkdir(parents=True, exist_ok=True)
         results_dict = self.results[dataset_name]
-        new_results_dict = {
-            k: np.stack(vs)
-            for k, vs in results_dict.items()
-        }
+        new_results_dict = {k: np.stack(vs) for k, vs in results_dict.items()}
 
         with open(filepath, "wb") as f:
             pickle.dump(new_results_dict, f)
@@ -91,13 +85,13 @@ def main(args):
     ckpt = torch.load(args.checkpoint, map_location=lambda storage, loc: storage)
     # Publicly released checkpoints use dicts for longevity, so we need to wrap them
     # up in an OmegaConf object as this is what EpicActionRecognitionSystem expects.
+    print(f"keys = {ckpt.keys()}")
     cfg = OmegaConf.create(ckpt["hyper_parameters"])
     OmegaConf.set_struct(cfg, False)  # allow writing arbitrary keys without raising
     # exceptions
     cfg.data._root_gulp_dir = os.getcwd()  # set default root gulp dir to prevent
     # exceptions on instantiating the EpicActionRecognitionSystem
     update_deprecated_cfg_options(cfg)
-
 
     system = EpicActionRecognitionSystem(cfg)
     system.load_state_dict(ckpt["state_dict"])
@@ -109,7 +103,6 @@ def main(args):
             delattr(system, "example_input_array")
         except AttributeError:
             pass
-
     if args.n_frames is not None:
         cfg.data.test_frame_count = args.n_frames
     if args.batch_size is not None:
@@ -117,7 +110,6 @@ def main(args):
     if args.datadir is not None:
         data_dir_key = f"{args.split}_gulp_dir"
         cfg.data[data_dir_key] = args.datadir
-
     # Since we don't support writing results when using DP or DDP
     LOG.info("Disabling DP/DDP")
     cfg.trainer.accelerator = None
@@ -136,7 +128,6 @@ def main(args):
         raise ValueError(
             f"Split {args.split!r} is not a recognised dataset split to " f"test on."
         )
-
     saver = ResultsSaver()
     trainer = Trainer(**cfg.trainer, callbacks=[saver])
     trainer.test(system, test_dataloaders=dataloader)
@@ -144,13 +135,14 @@ def main(args):
 
 
 def update_deprecated_cfg_options(cfg) -> None:
-    if 'trainer' in cfg:
-        if 'row_log_interval' in cfg.trainer:
-            cfg.trainer['log_every_n_steps'] = cfg.trainer['row_log_interval']
-            del cfg.trainer['row_log_interval']
-        if 'log_save_interval' in cfg.trainer:
-            cfg.trainer['flush_logs_every_n_steps'] = cfg.trainer['log_save_interval']
-            del cfg.trainer['log_save_interval']
+    if "trainer" in cfg:
+        if "row_log_interval" in cfg.trainer:
+            cfg.trainer["log_every_n_steps"] = cfg.trainer["row_log_interval"]
+            del cfg.trainer["row_log_interval"]
+        if "log_save_interval" in cfg.trainer:
+            cfg.trainer["flush_logs_every_n_steps"] = cfg.trainer["log_save_interval"]
+            del cfg.trainer["log_save_interval"]
+
 
 if __name__ == "__main__":
     main(parser.parse_args())
