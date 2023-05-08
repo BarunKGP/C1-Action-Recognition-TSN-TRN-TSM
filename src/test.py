@@ -111,6 +111,7 @@ def main(args):
         print("changing args.datadir")
         data_dir_key = f"{args.split}_gulp_dir"
         cfg.data[data_dir_key] = args.datadir
+    print(cfg.data["val_gulp_dir"])
     # Since we don't support writing results when using DP or DDP
     LOG.info("Disabling DP/DDP")
     cfg.trainer.accelerator = None
