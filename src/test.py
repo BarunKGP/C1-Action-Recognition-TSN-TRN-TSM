@@ -89,9 +89,7 @@ def main(args):
     cfg = OmegaConf.create(ckpt["hyper_parameters"])
     OmegaConf.set_struct(cfg, False)  # allow writing arbitrary keys without raising
     # exceptions
-    cfg.data._root_gulp_dir = os.path.join(
-        os.getcwd(), "gulp"
-    )  # set root gulp dir to prevent
+    cfg.data._root_gulp_dir = os.getcwd()  # set root gulp dir to prevent
     # exceptions on instantiating the EpicActionRecognitionSystem
     update_deprecated_cfg_options(cfg)
 
