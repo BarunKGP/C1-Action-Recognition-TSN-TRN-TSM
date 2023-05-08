@@ -85,7 +85,7 @@ def main(args):
     ckpt = torch.load(args.checkpoint, map_location=lambda storage, loc: storage)
     # Publicly released checkpoints use dicts for longevity, so we need to wrap them
     # up in an OmegaConf object as this is what EpicActionRecognitionSystem expects.
-    print(f"keys = {ckpt.keys()}")
+    # print(f"keys = {ckpt.keys()}")
     cfg = OmegaConf.create(ckpt["hyper_parameters"])
     OmegaConf.set_struct(cfg, False)  # allow writing arbitrary keys without raising
     # exceptions
@@ -108,6 +108,7 @@ def main(args):
     if args.batch_size is not None:
         cfg.learning.batch_size = args.batch_size
     if args.datadir is not None:
+        print("changing args.datadir")
         data_dir_key = f"{args.split}_gulp_dir"
         cfg.data[data_dir_key] = args.datadir
     # Since we don't support writing results when using DP or DDP
