@@ -231,10 +231,10 @@ class EpicActionRecognitionSystem(pl.LightningModule):
             "video_id": labels_dict["video_id"],
         }
 
-    def predict_step(self, batch, batch_idx):
-        data, labels_dict = batch
-        outputs = self(data)
-        return {"preds": outputs}
+    # def predict_step(self, batch, batch_idx):
+    #     data, labels_dict = batch
+    #     outputs = self(data)
+    #     return {"preds": outputs}
 
     def log_metrics(self, step_results: Dict[str, float], step_type: str) -> None:
         self.log(f"loss/{step_type}", step_results["loss"])
