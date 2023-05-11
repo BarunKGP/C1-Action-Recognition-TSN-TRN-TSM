@@ -133,7 +133,7 @@ def main(args):
         )
     saver = ResultsSaver()
     trainer = Trainer(**cfg.trainer, callbacks=[saver])
-    trainer.fit(system)
+    # trainer.fit(system)
     # trainer.test(system, test_dataloaders=dataloader)
     preds = trainer.predict(system, dataloader)
     # print(args.results)
