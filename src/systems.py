@@ -41,6 +41,7 @@ def split_task_outputs(
     for task, n_units in tasks:
         outputs[task] = output[..., offset : offset + n_units]
         offset += n_units
+    outputs["logits"] = output
     return outputs
 
 
@@ -227,6 +228,7 @@ class EpicActionRecognitionSystem(pl.LightningModule):
         return {
             "verb_output": outputs["verb"].detach().cpu().numpy(),
             "noun_output": outputs["noun"].detach().cpu().numpy(),
+            "logits": outputs["logits"].detach().cpu().numpy(),
             "narration_id": labels_dict["narration_id"],
             "video_id": labels_dict["video_id"],
         }
