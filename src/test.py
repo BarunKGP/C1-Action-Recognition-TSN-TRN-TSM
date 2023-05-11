@@ -65,10 +65,11 @@ class ResultsSaver(Callback):
         filepath = Path(filepath)
         filepath.parent.mkdir(parents=True, exist_ok=True)
         results_dict = self.results[dataset_name]
-        new_results_dict = {k: np.stack(vs) for k, vs in results_dict.items()}
-
+        # new_results_dict = {k: np.stack(vs) for k, vs in results_dict.items()}
+        # new_results_dict = {'preds': results_dict}
         with open(filepath, "wb") as f:
-            pickle.dump(new_results_dict, f)
+            # pickle.dump(new_results_dict, f)
+            pickle.dump(results_dict, f)
 
 
 def main(args):
@@ -133,13 +134,9 @@ def main(args):
     saver = ResultsSaver()
     trainer = Trainer(**cfg.trainer, callbacks=[saver])
     # trainer.test(system, test_dataloaders=dataloader)
-    trainer.predict(system, dataloader)
-    print(args.results)
+    preds = trainer.predict(system, dataloader)
+    # print(args.results)
     saver.save_results("test", args.results)
-
-
-def get_preds(model, xs):
-    return model(xs)
 
 
 def update_deprecated_cfg_options(cfg) -> None:
