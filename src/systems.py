@@ -232,7 +232,8 @@ class EpicActionRecognitionSystem(pl.LightningModule):
         }
 
     def predict_step(self, batch, batch_idx):
-        outputs = self(batch)
+        data, labels_dict = batch
+        outputs = self(data)
         return {"preds": outputs}
 
     def log_metrics(self, step_results: Dict[str, float], step_type: str) -> None:
