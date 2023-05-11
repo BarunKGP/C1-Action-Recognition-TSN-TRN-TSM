@@ -132,8 +132,14 @@ def main(args):
         )
     saver = ResultsSaver()
     trainer = Trainer(**cfg.trainer, callbacks=[saver])
-    trainer.test(system, test_dataloaders=dataloader)
+    # trainer.test(system, test_dataloaders=dataloader)
+    trainer.predict(system, dataloader)
+    print(args.results)
     saver.save_results("test", args.results)
+
+
+def get_preds(model, xs):
+    return model(xs)
 
 
 def update_deprecated_cfg_options(cfg) -> None:

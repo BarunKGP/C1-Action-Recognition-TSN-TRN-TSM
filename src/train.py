@@ -1,13 +1,10 @@
 import logging
 
 import hydra
-from omegaconf import DictConfig
-from omegaconf import OmegaConf
-from pytorch_lightning import seed_everything
-from pytorch_lightning import Trainer
+from omegaconf import DictConfig, OmegaConf
+from pytorch_lightning import seed_everything, Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint
-from systems import EpicActionRecogintionDataModule
-from systems import EpicActionRecognitionSystem
+from systems import EpicActionRecogintionDataModule, EpicActionRecognitionSystem
 
 LOG = logging.getLogger(__name__)
 
@@ -22,7 +19,7 @@ def main(cfg: DictConfig):
         # error, we allow you to prevent the tracer from running to log the graph when
         # the summary writer is created
         try:
-            delattr(system, 'example_input_array')
+            delattr(system, "example_input_array")
         except AttributeError:
             pass
     data_module = EpicActionRecogintionDataModule(cfg)
