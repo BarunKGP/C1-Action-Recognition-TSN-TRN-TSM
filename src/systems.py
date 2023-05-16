@@ -285,8 +285,7 @@ def load_model(cfg: DictConfig) -> TSN:
     output_dim: int = sum([class_count for _, class_count in TASK_CLASS_COUNTS])
     if cfg.model.type == "TSN":
         model = TSN(
-            # num_class=output_dim,
-            num_class=cfg.model.num_class,
+            num_class=output_dim,
             num_segments=cfg.data.frame_count,
             modality=cfg.modality,
             base_model=cfg.model.backbone,
@@ -310,7 +309,8 @@ def load_model(cfg: DictConfig) -> TSN:
         )
     elif cfg.model.type == "TSM":
         model = TSM(
-            num_class=output_dim,
+            # num_class=output_dim,
+            num_class=cfg.model.num_class,
             num_segments=cfg.data.frame_count,
             modality=cfg.modality,
             base_model=cfg.model.backbone,
