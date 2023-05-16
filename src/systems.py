@@ -177,6 +177,7 @@ class EpicActionRecognitionSystem(pl.LightningModule):
         self.cfg = cfg
         self.save_hyperparameters(cfg)
         self.model = load_model(cfg)
+        LOG.info(f"Model {self.model.__class__.__name__} loaded from config")
         channels = cfg.data.segment_length * (3 if cfg.modality == "RGB" else 2)
         self.example_input_array = torch.randn(  # type: ignore
             (
@@ -285,6 +286,7 @@ class EpicActionRecognitionSystem(pl.LightningModule):
 
 def load_model(cfg: DictConfig) -> TSN:
     output_dim: int = sum([class_count for _, class_count in TASK_CLASS_COUNTS])
+    LOG.info("Assigning model state...")
     if cfg.model.type == "TSN":
         model = TSN(
             num_class=output_dim,
@@ -327,6 +329,7 @@ def load_model(cfg: DictConfig) -> TSN:
         )
     else:
         raise ValueError(f"Unknown model type {cfg.model.type!r}")
+    LOG.info("Assigning model weights...")
     if cfg.model.get("weights", None) is not None:
         if cfg.model.pretrained is not None:
             LOG.warning(
