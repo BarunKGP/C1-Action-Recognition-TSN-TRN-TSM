@@ -91,6 +91,7 @@ def main(args):
     OmegaConf.set_struct(cfg, False)  # allow writing arbitrary keys without raising
     # exceptions
     cfg.data._root_gulp_dir = os.getcwd()  # set root gulp dir to prevent
+    cfg.data.num_class = 1024  # hack to get features instead of predictions
     # exceptions on instantiating the EpicActionRecognitionSystem
     update_deprecated_cfg_options(cfg)
 
