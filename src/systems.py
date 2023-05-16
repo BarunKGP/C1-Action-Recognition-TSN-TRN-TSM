@@ -177,6 +177,7 @@ class EpicActionRecognitionSystem(pl.LightningModule):
         self.cfg = cfg
         self.save_hyperparameters(cfg)
         self.model = load_model(cfg)
+        print(f"model: {self.model}")
         channels = cfg.data.segment_length * (3 if cfg.modality == "RGB" else 2)
         self.example_input_array = torch.randn(  # type: ignore
             (
