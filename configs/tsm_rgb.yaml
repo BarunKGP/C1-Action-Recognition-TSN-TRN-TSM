@@ -26,7 +26,7 @@ data:
 
 model:
   type: TSM
-  backbone: resnet50
+  backbone: resnet18
   pretrained: kinetics
   dropout: 0.7
   partial_bn: yes
