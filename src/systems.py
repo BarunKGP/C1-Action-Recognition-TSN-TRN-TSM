@@ -205,7 +205,7 @@ class EpicActionRecognitionSystem(pl.LightningModule):
         return [optimizer], [scheduler]
 
     def forward(self, xs):
-        LOG.debug("starting feature extraction")
+        LOG.info("starting feature extraction")
         return self.model(xs)
 
     def forward_tasks(self, xs: torch.Tensor) -> Dict[str, torch.Tensor]:
@@ -252,9 +252,9 @@ class EpicActionRecognitionSystem(pl.LightningModule):
 
     def _step(self, batch: Tuple[torch.Tensor, Dict[str, Any]]) -> Dict[str, Any]:
         data, labels_dict = batch
-        LOG.debug("starting forward_tasks")
+        LOG.info("starting forward_tasks")
         outputs: Dict[str, Tensor] = self.forward_tasks(data)
-        LOG.debug("finished forward_tasks")
+        LOG.info("finished forward_tasks")
         tasks = {
             task: {
                 "output": outputs[task],
