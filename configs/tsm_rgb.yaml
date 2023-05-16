@@ -33,6 +33,7 @@ model:
   shift_div: 8
   non_local: False
   temporal_pool: False
+  num_class: 1024
 
 learning:
   batch_size: 64
