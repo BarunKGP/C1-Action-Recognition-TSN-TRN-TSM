@@ -285,7 +285,6 @@ class EpicActionRecognitionSystem(pl.LightningModule):
 
 def load_model(cfg: DictConfig) -> TSN:
     output_dim: int = sum([class_count for _, class_count in TASK_CLASS_COUNTS])
-    print(f"output_dim = {output_dim}, num_class = {cfg.model.num_class}")
     if cfg.model.type == "TSN":
         model = TSN(
             num_class=output_dim,
