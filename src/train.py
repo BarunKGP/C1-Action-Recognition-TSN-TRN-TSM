@@ -14,7 +14,6 @@ def main(cfg: DictConfig):
     LOG.info("Config:\n" + OmegaConf.to_yaml(cfg))
     seed_everything(cfg.seed)
     system = EpicActionRecognitionSystem(cfg)
-    print(f"model architecture: {system}")
     if not cfg.get("log_graph", True):
         # MTRN can't be traced due to the model stochasticity so causes a JIT tracer
         # error, we allow you to prevent the tracer from running to log the graph when
