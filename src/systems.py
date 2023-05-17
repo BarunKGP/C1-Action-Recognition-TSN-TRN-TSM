@@ -286,7 +286,7 @@ class EpicActionRecognitionSystem(pl.LightningModule):
 
 def load_model(cfg: DictConfig) -> TSN:
     output_dim: int = sum([class_count for _, class_count in TASK_CLASS_COUNTS])
-    LOG.info("Assigning model state...")
+    # LOG.info("Assigning model state...")
     if cfg.model.type == "TSN":
         model = TSN(
             num_class=output_dim,
@@ -329,7 +329,7 @@ def load_model(cfg: DictConfig) -> TSN:
         )
     else:
         raise ValueError(f"Unknown model type {cfg.model.type!r}")
-    LOG.info("Assigning model weights...")
+    # LOG.info("Assigning model weights...")
     if cfg.model.get("weights", None) is not None:
         if cfg.model.pretrained is not None:
             LOG.warning(
