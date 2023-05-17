@@ -30,7 +30,9 @@ def main(cfg: DictConfig):
     trainer = Trainer(
         callbacks=[], checkpoint_callback=checkpoint_callback, **cfg.trainer
     )
+    LOG.info("Starting training....")
     trainer.fit(system, datamodule=data_module)
+    LOG.info("Training completed!")
 
 
 if __name__ == "__main__":
