@@ -31,7 +31,6 @@ def main(cfg: DictConfig):
         callbacks=[], checkpoint_callback=checkpoint_callback, **cfg.trainer
     )
     LOG.info("Starting training....")
-    print(trainer.strategy)
     trainer.fit(system, datamodule=data_module)
     LOG.info("Training completed!")
 
