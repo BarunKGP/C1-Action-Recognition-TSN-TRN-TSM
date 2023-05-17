@@ -28,7 +28,10 @@ def main(cfg: DictConfig):
     checkpoint_callback = ModelCheckpoint(save_top_k=None, monitor=None)
     # with ipdb.launch_ipdb_on_exception():
     trainer = Trainer(
-        callbacks=[], checkpoint_callback=checkpoint_callback, **cfg.trainer
+        callbacks=[],
+        checkpoint_callback=checkpoint_callback,
+        max_steps=5,
+        **cfg.trainer
     )
     LOG.info("Starting training....")
     trainer.fit(system, datamodule=data_module)
