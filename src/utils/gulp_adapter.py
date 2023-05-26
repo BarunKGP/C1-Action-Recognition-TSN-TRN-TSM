@@ -118,7 +118,9 @@ class EpicFlowDatasetAdapter(EpicDatasetAdapter):
         for meta in self.meta_data[slice_element]:
             video_id = meta["video_id"]
 
-            folder = Path(self.video_segment_dir) / meta["participant_id"] / video_id
+            folder = Path(meta["root_dir"]) / "flow_frames" / video_id
+            print(f"folder path = {folder}")
+            break
             start_frame = meta["start_frame"]
             stop_frame = meta["end_frame"]
             paths = {
